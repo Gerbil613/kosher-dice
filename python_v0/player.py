@@ -171,11 +171,11 @@ class Player(Bot):
             Player.score_pair(my_cards[0], my_cards[1])
 
             # if we have strong hole cards, let's raise a lot
-            is_strong = True
-            for card in my_cards: # Th
-                if not (card[0] in strong_cards):
-                    is_strong = False
-                    break
+            is_strong = Player.score_pair(my_cards[0], my_cards[1]) > 0.6
+            # for card in my_cards: # Th
+            #     if not (card[0] in strong_cards):
+            #         is_strong = False
+            #         break
 
             if is_strong:
                 return RaiseAction(min(min_raise * 10, max_raise))
