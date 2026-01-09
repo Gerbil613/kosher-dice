@@ -241,7 +241,12 @@ class Player(Bot):
             max_cost = max_raise - my_pip  # the cost of a maximum bet/raise
 
             # if we have strong hole cards, let's raise a lot
-            is_strong = Player.score_pair(my_cards[0], my_cards[1]) > 0.6
+            is_strong = False
+            all_cards = my_cards + board_cards
+            for i in range(len(all_cards)):
+                for j in range(i, len(all_cards)):
+                    score = Player.score_pair(all_cards[i], all_cards[j])
+                    is_strong = is_strong or score > 0.6
             # for card in my_cards: # Th
             #     if not (card[0] in strong_cards):
             #         is_strong = False

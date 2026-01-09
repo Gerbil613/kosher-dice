@@ -15,6 +15,9 @@ import sys
 import os
 import random
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 sys.path.append(os.getcwd())
 from config import *
 ###New action for discarding a card from your hand and adding it to the board
@@ -281,7 +284,7 @@ class Player():
             except OSError:
                 print(self.name, 'build failed - check "build" in commands.json')
 
-    def run(self):
+    def run(self, verbose=True):
         '''
         Runs the pokerbot and establishes the socket connection.
         '''
@@ -318,7 +321,8 @@ class Player():
                             client_socket.settimeout(CONNECT_TIMEOUT)
                         sock = client_socket.makefile('rw')
                         self.socketfile = sock
-                        print(self.name, 'connected successfully')
+                        if verbose:
+                            print(self.name, 'connected successfully')
             except (TypeError, ValueError):
                 print(self.name, 'run command misformatted')
             except OSError:
@@ -552,28 +556,37 @@ class Game():
             player.query(round_state, player_message, self.log)
             player.bankroll += delta
 
-    def run(self):
+    def run(self, verbose=True):
         '''
         Runs one game of poker.
         '''
-        print('   __  _____________  ___       __           __        __    ')
-        print('  /  |/  /  _/_  __/ / _ \\___  / /_____ ____/ /  ___  / /____')
-        print(' / /|_/ // /  / /   / ___/ _ \\/  \'_/ -_) __/ _ \\/ _ \\/ __(_-<')
-        print('/_/  /_/___/ /_/   /_/   \\___/_/\\_\\\\__/_/ /_.__/\\___/\\__/___/')
-        print()
-        print('Starting the Pokerbots engine...')
+        if verbose:
+            print('   __  _____________  ___       __           __        __    ')
+            print('  /  |/  /  _/_  __/ / _ \\___  / /_____ ____/ /  ___  / /____')
+            print(' / /|_/ // /  / /   / ___/ _ \\/  \'_/ -_) __/ _ \\/ _ \\/ __(_-<')
+            print('/_/  /_/___/ /_/   /_/   \\___/_/\\_\\\\__/_/ /_.__/\\___/\\__/___/')
+            print()
+            print('Starting the Pokerbots engine...')
         players = [
             Player(PLAYER_1_NAME, PLAYER_1_PATH),
             Player(PLAYER_2_NAME, PLAYER_2_PATH)
         ]
 
+        A_winnings = []
+
         for player in players:
             player.build()
         for player in players:
-            player.run()
+            player.run(verbose=verbose)
         for round_num in range(1, NUM_ROUNDS + 1):
             self.log.append('')
-            self.log.append('Round #' + str(round_num) + STATUS(players))
+            status = STATUS(players)
+            self.log.append('Round #' + str(round_num) + status)
+            if players[0].name == PLAYER_1_NAME:
+                A_winnings.append(players[0].bankroll)
+
+            else:
+                A_winnings.append(players[1].bankroll)
             self.run_round(players)
             players = players[::-1]
             
@@ -590,6 +603,21 @@ class Game():
         with open(name, 'w') as log_file:
             log_file.write('\n'.join(self.log))
 
+        return np.array(A_winnings)
+
 
 if __name__ == '__main__':
-    Game().run()
+    total = np.zeros(NUM_ROUNDS)
+    for i in range(NUM_GAMES):
+        total += Game().run(verbose=False)
+
+    total /= NUM_GAMES
+
+    plt.title(f"Player {PLAYER_1_NAME}'s Winnings Against Player {PLAYER_2_NAME}", fontsize=15)
+    plt.xlabel("Number of Rounds", fontsize=15)
+    plt.ylabel("Winnings", fontsize=15)
+    plt.plot([0] * NUM_ROUNDS, color='red')
+    plt.xticks(fontsize=15)
+    plt.yticks(fontsize=15)
+    plt.plot(total)
+    plt.show()
