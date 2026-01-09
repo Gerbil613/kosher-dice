@@ -100,6 +100,49 @@ class Player(Bot):
     A pokerbot.
     '''
 
+    @staticmethod
+    def score_pair(a, b):
+        '''
+        Docstring for score_pair
+        
+        :param a: First card
+        :param b: Second card
+
+        Evaluates strength of pair of cards based on lecture note picture
+        '''
+        # The raw data extracted from the image grid (Row by Row: A -> 2)
+        rank_to_index = {'AKQJT98765432'[i]: i for i in range(13)}
+        data = [
+            # A           K     Q     J     T     9     8     7     6     5     4     3     2
+            [9.95, 3.96, 2.90, 2.32, 1.97, 1.53, 1.35, 1.23, 1.06, 1.16, 1.05, 0.95, 0.85], # A Row
+            [3.19, 8.17, 2.07, 1.73, 1.52, 1.14, 0.91, 0.81, 0.71, 0.60, 0.52, 0.45, 0.39], # K Row
+            [2.06, 1.29, 6.58, 1.53, 1.38, 1.05, 0.78, 0.53, 0.46, 0.39, 0.34, 0.27, 0.22], # Q Row
+            [1.49, 0.94, 0.80, 5.21, 1.34, 1.02, 0.79, 0.51, 0.29, 0.25, 0.21, 0.19, 0.16], # J Row
+            [1.13, 0.73, 0.63, 0.63, 4.08, 1.03, 0.85, 0.58, 0.33, 0.20, 0.18, 0.16, 0.13], # T Row
+            [0.70, 0.37, 0.33, 0.33, 0.36, 3.15, 0.89, 0.68, 0.44, 0.19, 0.13, 0.11, 0.08], # 9 Row
+            [0.53, 0.27, 0.22, 0.22, 0.25, 0.26, 2.43, 0.77, 0.59, 0.32, 0.14, 0.07, 0.05], # 8 Row
+            [0.41, 0.22, 0.13, 0.13, 0.16, 0.18, 0.19, 1.86, 0.66, 0.43, 0.20, 0.09, 0.01], # 7 Row
+            [0.33, 0.16, 0.08, 0.04, 0.07, 0.09, 0.11, 0.14, 1.49, 0.57, 0.37, 0.13, 0.03], # 6 Row
+            [0.33, 0.12, 0.05, 0.02, 0.00, 0.01, 0.03, 0.07, 0.09, 1.19, 0.53, 0.32, 0.08], # 5 Row
+            [0.28, 0.08, 0.03, 0.00, 0.00, 0.00, 0.00, 0.00, 0.03, 0.06, 0.97, 0.23, 0.06], # 4 Row
+            [0.25, 0.05, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.78, 0.02], # 3 Row
+            [0.20, 0.02, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.61]  # 2 Row
+        ]
+        if a[0] == a[0]: # same rank
+            rank = a[0]
+            index = rank_to_index[rank]
+            return data[index][index]
+        
+        # different ranks
+        score1 = data[rank_to_index[a[0]]][rank_to_index[b[0]]]
+        score2 = data[rank_to_index[b[0]]][rank_to_index[a[0]]]
+        higher = max(score1, score2)
+        lower = min(score1, score2)
+        if a[1] == b[1]: # same suit
+            return higher
+        
+        return lower
+
     def __init__(self):
         '''
         Called when a new game starts. Called exactly once.
@@ -197,12 +240,14 @@ class Player(Bot):
             min_cost = min_raise - my_pip  # the cost of a minimum bet/raise
             max_cost = max_raise - my_pip  # the cost of a maximum bet/raise
 
+            Player.score_pair(my_cards[0], my_cards[1])
+
             # if we have strong hole cards, let's raise a lot
-            is_strong = True
-            for card in my_cards: # Th
-                if not (card[0] in strong_cards):
-                    is_strong = False
-                    break
+            is_strong = Player.score_pair(my_cards[0], my_cards[1]) > 0.6
+            # for card in my_cards: # Th
+            #     if not (card[0] in strong_cards):
+            #         is_strong = False
+            #         break
 
             if is_strong:
                 return RaiseAction(min(min_raise * 10, max_raise))
