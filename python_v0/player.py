@@ -104,7 +104,7 @@ class Player(Bot):
     def score_pair(a, b):
         '''
         Docstring for score_pair
-        
+
         :param a: First card
         :param b: Second card
 
@@ -132,7 +132,7 @@ class Player(Bot):
             rank = a[0]
             index = rank_to_index[rank]
             return data[index][index]
-        
+
         # different ranks
         score1 = data[rank_to_index[a[0]]][rank_to_index[b[0]]]
         score2 = data[rank_to_index[b[0]]][rank_to_index[a[0]]]
@@ -140,7 +140,7 @@ class Player(Bot):
         lower = min(score1, score2)
         if a[1] == b[1]: # same suit
             return higher
-        
+
         return lower
 
     def __init__(self):
@@ -251,11 +251,11 @@ class Player(Bot):
 
             if is_strong:
                 return RaiseAction(min(min_raise * 10, max_raise))
-            
+
             else:
                 if random.random() < 0.5:
                     return RaiseAction(min_raise)
-                
+
         if CheckAction in legal_actions:  # check-call
             return CheckAction()
         if random.random() < 0.25:
