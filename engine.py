@@ -599,7 +599,8 @@ class Game():
             self.log.append('{} turn bets EV: {}'.format(player.name, self.ev_turn_bets[player.name]))
             player.stop()
         name = GAME_LOG_FILENAME + '.txt'
-        print('Writing', name)
+        if verbose:
+            print('Writing', name)
         with open(name, 'w') as log_file:
             log_file.write('\n'.join(self.log))
 
@@ -610,6 +611,7 @@ if __name__ == '__main__':
     total = np.zeros(NUM_ROUNDS)
     for i in range(NUM_GAMES):
         total += Game().run(verbose=False)
+        print(f"Game {i+1}")
 
     total /= NUM_GAMES
 
