@@ -128,7 +128,7 @@ class Player(Bot):
             [0.25, 0.05, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.78, 0.02], # 3 Row
             [0.20, 0.02, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.61]  # 2 Row
         ]
-        if a[0] == a[0]: # same rank
+        if a[0] == b[0]: # same rank
             rank = a[0]
             index = rank_to_index[rank]
             return data[index][index]
